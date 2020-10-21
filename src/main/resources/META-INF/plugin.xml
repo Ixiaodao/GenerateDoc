@@ -1,6 +1,6 @@
 <idea-plugin url="https://plugins.jetbrains.com/plugin/10292-restfultoolkit" allow-bundled-update="true">
   <id>com.zhaow.restful.toolkit</id>
-  <name>WebDevelopmentKit (WDK)</name>
+  <name>RestfulToolkit</name>
   <version>3.0.0</version>
   <vendor email="mrmanzhaow@163.com" url="">zhaow</vendor>
 
@@ -16,7 +16,7 @@
    <p> support Spring framework (Spring MVC / Spring Boot)
    <p> support JAX-RS
    <p> support Java and Kotlin languages
- 
+
   <hr />
   <h3>一套 RESTful 服务开发辅助工具集。</h3>
   <ul>
@@ -68,7 +68,7 @@
   </change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="192.5728.98"/>
+  <idea-version since-build="192.5728.98" until-build="202.*"/>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
@@ -162,7 +162,7 @@
       <action id="ConvertClassToJSONCompressedAction" class="com.zhaow.restful.action.ConvertClassToJSONCompressedAction" text="Convert to JSON (Compressed)" description="Convert to JSON (Compressed)">
           <add-to-group group-id="EditorPopupMenu" anchor="first" />
       </action>
-      
+
       <!-- url 导航 -->
       <action id="Toolkit.GotoService" class="com.zhaow.restful.navigation.action.GotoRequestMappingAction"
                text="_Service" description="Go to Service"
