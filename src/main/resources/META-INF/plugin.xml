@@ -101,6 +101,8 @@
     <!-- Add your extensions here -->
       <productivityFeaturesProvider  implementation="com.zhaow.restful.statistics.RestfulToolkitFeaturesProvider" />
       <tipAndTrick feature-id="navigation.popup.service" file="GotoService.html"/>
+    <!-- 项目路径配置 -->
+      <applicationService id="RestfulToolkit.Settings" serviceImplementation="com.zhaow.restful.setting.Settings"/>
   </extensions>
 
     <application-components>
@@ -185,6 +187,11 @@
       <action id="Toolkit.RefreshServices" class="com.zhaow.restful.navigator.RefreshProjectAction"
               text="Refresh Services in Project"
               icon="AllIcons.Actions.Refresh">
+      </action>
+
+      <action class="com.zhaow.restful.action.ContextPathAction"
+              id="RestfulToolkit.ContextPathAction">
+          <add-to-group group-id="HelpMenu" anchor="last"/>
       </action>
 
       <group id="Toolkit.NavigatorActionsToolbar">

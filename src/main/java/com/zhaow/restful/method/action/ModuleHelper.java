@@ -2,6 +2,7 @@ package com.zhaow.restful.method.action;
 
 
 import com.intellij.openapi.module.Module;
+import com.zhaow.restful.setting.Settings;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,7 +43,12 @@ public class ModuleHelper {
         if (StringUtils.isEmpty(port)) port = PORT;
 
         String contextPath = propertiesHandler.getContextPath();
-        return new StringBuilder(SCHEME).append(HOST).append(":").append(port).append(contextPath).toString();
+        String projectContextPath = Settings.getInstance().getContextPath();
+        if (StringUtils.isNotBlank(projectContextPath)) {
+            return projectContextPath;
+        } else {
+            return new StringBuilder(SCHEME).append(HOST).append(":").append(port).append(contextPath).toString();
+        }
     }
 
 }
