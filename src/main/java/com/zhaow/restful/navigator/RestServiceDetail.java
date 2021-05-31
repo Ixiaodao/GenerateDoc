@@ -53,6 +53,8 @@ public class RestServiceDetail extends JBPanel/*WithEmptyText*/{
     public JButton sendButton;
     public JTabbedPane requestTabbedPane;
     private JTextField contextPath;
+    private JButton contextPathButton;
+    private JLabel contextPathLabel;
 
     public JTextArea requestParamsTextArea;
 
@@ -122,7 +124,7 @@ public class RestServiceDetail extends JBPanel/*WithEmptyText*/{
 //        urlPanel = new JBPanelWithEmptyText();
         urlPanel = new JBPanel();
 
-        GridLayoutManager mgr = new GridLayoutManager(1, 4);
+        GridLayoutManager mgr = new GridLayoutManager(2, 3);
 //        GridLayoutManager mgr = new GridLayoutManager(1, 2);
         mgr.setHGap(1);
         mgr.setVGap(1);
@@ -131,22 +133,29 @@ public class RestServiceDetail extends JBPanel/*WithEmptyText*/{
 
         initContextPath(contextPath);
 
-        urlPanel.add(contextPath, new GridConstraints(0, 0, 1,1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
+
+        urlPanel.add(contextPathLabel, new GridConstraints(0, 0, 1,1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
+                GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED,
+                null, null, null));
+        urlPanel.add(contextPath, new GridConstraints(0, 1, 1,1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
+                GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED,
+                null, null, null));
+        urlPanel.add(contextPathButton, new GridConstraints(0, 2, 1,1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
                 GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED,
                 null, null, null));
 
         urlPanel.add(methodField,
-                new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
+                new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
                         GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED,
                         null, null, null));
         urlPanel.add(urlField,
-                new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
+                new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
                         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                         null, null, null));
 // 是否必要保留？
         urlPanel.add(sendButton,
-                new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
+                new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
                         GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED,
                         null, null, null));
 
@@ -169,21 +178,14 @@ public class RestServiceDetail extends JBPanel/*WithEmptyText*/{
         if (settings != null) {
             contextPath.setText(settings.getContextPath());
         }
-        contextPath.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent focusEvent) {
+        contextPathButton.addActionListener((event) -> {
+            String text = contextPath.getText();
+            if (StringUtils.isEmpty(text)) {
+                return;
             }
-
-            @Override
-            public void focusLost(FocusEvent focusEvent) {
-                String text = contextPath.getText();
-                if (StringUtils.isEmpty(text)) {
-                    return;
-                }
-                Settings settings = Settings.getInstance(project);
-                if (settings != null) {
-                    settings.setContextPath(text);
-                }
+            Settings contextPathSetting = Settings.getInstance(project);
+            if (contextPathSetting != null) {
+                contextPathSetting.setContextPath(text);
             }
         });
     }
