@@ -189,11 +189,6 @@
               icon="AllIcons.Actions.Refresh">
       </action>
 
-      <action class="com.zhaow.restful.action.ContextPathAction"
-              id="RestfulToolkit.ContextPathAction">
-          <add-to-group group-id="HelpMenu" anchor="last"/>
-      </action>
-
       <group id="Toolkit.NavigatorActionsToolbar">
           <reference id="Toolkit.RefreshServices"/>
           <separator/>

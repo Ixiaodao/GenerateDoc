@@ -15,6 +15,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.zhaow.restful.common.RequestHelper;
+import com.zhaow.restful.setting.Settings;
 import com.zhaow.utils.JsonUtils;
 import com.zhaow.utils.ToolkitUtil;
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -35,6 +38,7 @@ import java.util.Map;
 
 public class RestServiceDetail extends JBPanel/*WithEmptyText*/{
     private static RestServiceDetail restServiceDetail;
+    private Project project;
 /*
     JBTextField methodField = new JBTextField("GET");
     JBTextField urlField = new JBTextField("url url ");*/
@@ -48,6 +52,7 @@ public class RestServiceDetail extends JBPanel/*WithEmptyText*/{
     public JTextField methodField;
     public JButton sendButton;
     public JTabbedPane requestTabbedPane;
+    private JTextField contextPath;
 
     public JTextArea requestParamsTextArea;
 
@@ -68,6 +73,13 @@ public class RestServiceDetail extends JBPanel/*WithEmptyText*/{
 
     private RestServiceDetail() {
         super();
+//        withEmptyText("JSON FORMAT");
+        initComponent();
+    }
+
+    private RestServiceDetail(Project project) {
+        super();
+        this.project = project;
 //        withEmptyText("JSON FORMAT");
         initComponent();
     }
@@ -110,25 +122,31 @@ public class RestServiceDetail extends JBPanel/*WithEmptyText*/{
 //        urlPanel = new JBPanelWithEmptyText();
         urlPanel = new JBPanel();
 
-        GridLayoutManager mgr = new GridLayoutManager(1, 3);
+        GridLayoutManager mgr = new GridLayoutManager(1, 4);
 //        GridLayoutManager mgr = new GridLayoutManager(1, 2);
         mgr.setHGap(1);
         mgr.setVGap(1);
         urlPanel.setLayout(mgr);
 //        urlPanel.setLayout(new HorizontalLayout());
 
+        initContextPath(contextPath);
+
+        urlPanel.add(contextPath, new GridConstraints(0, 0, 1,1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
+                GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED,
+                null, null, null));
+
         urlPanel.add(methodField,
-                new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
+                new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
                         GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED,
                         null, null, null));
         urlPanel.add(urlField,
-                new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
+                new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
                         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                         null, null, null));
 // 是否必要保留？
         urlPanel.add(sendButton,
-                new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
+                new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_BOTH,
                         GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED,
                         null, null, null));
 
@@ -144,6 +162,30 @@ public class RestServiceDetail extends JBPanel/*WithEmptyText*/{
                         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                         null, null, null));
+    }
+
+    private void initContextPath(JTextField contextPath) {
+        Settings settings = Settings.getInstance(project);
+        if (settings != null) {
+            contextPath.setText(settings.getContextPath());
+        }
+        contextPath.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent focusEvent) {
+            }
+
+            @Override
+            public void focusLost(FocusEvent focusEvent) {
+                String text = contextPath.getText();
+                if (StringUtils.isEmpty(text)) {
+                    return;
+                }
+                Settings settings = Settings.getInstance(project);
+                if (settings != null) {
+                    settings.setContextPath(text);
+                }
+            }
+        });
     }
 
     private void bindSendButtonActionListener() {
