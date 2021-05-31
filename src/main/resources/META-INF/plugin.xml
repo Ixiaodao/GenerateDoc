@@ -68,7 +68,7 @@
   </change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="192.5728.98" until-build="202.*"/>
+  <idea-version since-build="192.5728.98" until-build="203.*"/>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
@@ -102,7 +102,7 @@
       <productivityFeaturesProvider  implementation="com.zhaow.restful.statistics.RestfulToolkitFeaturesProvider" />
       <tipAndTrick feature-id="navigation.popup.service" file="GotoService.html"/>
     <!-- 项目路径配置 -->
-      <applicationService id="RestfulToolkit.Settings" serviceImplementation="com.zhaow.restful.setting.Settings"/>
+      <projectService id="RestfulToolkit.Settings" serviceImplementation="com.zhaow.restful.setting.Settings"/>
   </extensions>
 
     <application-components>

@@ -19,7 +19,7 @@ public class ContextPathAction extends AnAction implements DumbAware {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-        new SampleDialogWrapper().showAndGet();
+        new SampleDialogWrapper(anActionEvent.getProject()).showAndGet();
     }
 
 }

@@ -1,6 +1,7 @@
 package com.zhaow.restful.method.action;
 
 
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.module.Module;
 import com.zhaow.restful.setting.Settings;
 import org.apache.commons.lang.StringUtils;
@@ -43,7 +44,11 @@ public class ModuleHelper {
         if (StringUtils.isEmpty(port)) port = PORT;
 
         String contextPath = propertiesHandler.getContextPath();
-        String projectContextPath = Settings.getInstance().getContextPath();
+        Settings settings = Settings.getInstance(module.getProject());
+        String projectContextPath = null;
+        if (settings != null) {
+            projectContextPath = settings.getContextPath();
+        }
         if (StringUtils.isNotBlank(projectContextPath)) {
             return projectContextPath;
         } else {
