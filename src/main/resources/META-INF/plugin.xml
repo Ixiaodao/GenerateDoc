@@ -164,6 +164,9 @@
       <action id="ConvertClassToJSONCompressedAction" class="com.zhaow.restful.action.ConvertClassToJSONCompressedAction" text="Convert to JSON (Compressed)" description="Convert to JSON (Compressed)">
           <add-to-group group-id="EditorPopupMenu" anchor="first" />
       </action>
+      <action id="ConvertClassToCarTestJSONCompressedAction" class="com.zhaow.restful.action.ConvertClassToCarTestJSONCompressedAction" text="Convert to CarTest JSON " description="Convert to CarTest JSON">
+          <add-to-group group-id="EditorPopupMenu" anchor="first" />
+      </action>
 
       <!-- url 导航 -->
       <action id="Toolkit.GotoService" class="com.zhaow.restful.navigation.action.GotoRequestMappingAction"
