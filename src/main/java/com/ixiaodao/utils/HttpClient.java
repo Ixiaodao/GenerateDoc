@@ -43,18 +43,21 @@ public class HttpClient {
 			response = httpClient.execute(httpPost);
 
 			if (response == null) {
-				Messages.showWarningDialog("响应内容为空", "提示");
-				return null;
+				throw new RuntimeException("响应内容为空");
 			}
 			// 从响应模型中获取响应实体
 			HttpEntity responseEntity = response.getEntity();
 			if (response.getStatusLine().getStatusCode() ==200 && responseEntity != null ) {
-				Messages.showWarningDialog(EntityUtils.toString(responseEntity), "提示");
+				String msg = EntityUtils.toString(responseEntity);
+				if (!"success".equals(msg)) {
+					throw new RuntimeException(msg);
+				}
+				return msg;
 			} else {
-				Messages.showWarningDialog("调用返回状态非200", "提示");
+				throw new RuntimeException("调用返回状态非200");
 			}
 		} catch (ParseException | IOException e) {
-			Messages.showErrorDialog(e.getMessage(), "提示");
+			throw new RuntimeException(e.getMessage());
 		} finally {
 			try {
 				// 释放资源
@@ -67,6 +70,5 @@ public class HttpClient {
 			} catch (IOException ignored) {
 			}
 		}
-		return null;
 	}
 }

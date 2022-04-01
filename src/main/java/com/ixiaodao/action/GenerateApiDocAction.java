@@ -15,13 +15,13 @@ import com.intellij.psi.PsiType;
 import com.ixiaodao.hepler.PsiClassCarTestHelper;
 import com.ixiaodao.model.CarTestConfigVO;
 import com.ixiaodao.model.CarTestVO;
+import com.ixiaodao.model.ReturnClassNameVO;
 import com.ixiaodao.ui.CarTestConfig;
 import com.ixiaodao.utils.DocCommentUtil;
+import com.ixiaodao.utils.JavaTypeUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 1
@@ -54,10 +54,15 @@ public class GenerateApiDocAction extends AnAction {
 			PsiParameterList parameterList = psiMethod.getParameterList();
 			PsiParameter[] parameters = parameterList.getParameters();
 			if (parameters.length > 1) {
-				Messages.showWarningDialog("Param个数不能超过1个", "提示");
+				Messages.showErrorDialog("Param个数不能超过1个", "提示");
 				return;
 			}
-			PsiParameter parameter = parameters[0];
+			String paramClassName;
+			if (parameters.length == 0) {
+				paramClassName = null;
+			} else {
+				paramClassName = parameters[0].getType().getCanonicalText();
+			}
 			String returnClassName = null;
 			String commonClassName = null;
 			PsiType returnType = psiMethod.getReturnType();
@@ -71,37 +76,36 @@ public class GenerateApiDocAction extends AnAction {
 			carTestConfigVO.setServiceName(serviceName);
 			carTestConfigVO.setBeanId(serviceName);
 			carTestConfigVO.setMethodName(psiMethod.getName());
-			carTestConfigVO.setParamClassName(parameter.getType().getCanonicalText());
+			carTestConfigVO.setParamClassName(paramClassName);
 			carTestConfigVO.setReturnClassName(returnClassName);
-			carTestConfigVO.setCommonClassName(commonClassName);
-
-
-
 
 			PsiClass onePsiClassByClassName = PsiClassCarTestHelper.findOnePsiClassByClassName(carTestConfigVO.getParamClassName(), project);
-
 			List<CarTestVO> paramList = null;
 			if (onePsiClassByClassName != null) {
 				paramList = PsiClassCarTestHelper.create(onePsiClassByClassName).convertClassToCarTestList(project, false);
-				if (paramList != null) {
-					for (CarTestVO carTestVO : paramList) {
-						carTestVO.setType(1);
+			}
+
+			ReturnClassNameVO returnClassNameVO = getReturnString(returnType, project);
+			List<CarTestVO> returnList = null;
+
+			if (returnClassNameVO != null) {
+				carTestConfigVO.setCommonClassName(returnClassNameVO.getResultName());
+				if ("java.util.List".equals(returnClassNameVO.getResultName())) {
+					carTestConfigVO.setCommonClassName(null);
+				}
+				PsiClass returnClass = PsiClassCarTestHelper.findOnePsiClassByClassName(returnClassNameVO.getClassName(), project);
+				if (returnClass != null) {
+					List<CarTestVO> carTestVOS = PsiClassCarTestHelper.create(returnClass).convertClassToCarTestList(project, false);
+					if (CollectionUtils.isNotEmpty(carTestVOS)) {
+						returnList = carTestVOS;
 					}
 				}
 			}
-
-			List<CarTestVO> returnList = getReturnString(returnType, project);
-			if (returnList != null) {
-				for (CarTestVO carTestVO : returnList) {
-					carTestVO.setType(2);
-				}
-			}
-
 			new CarTestConfig(project, carTestConfigVO, paramList, returnList).show();
 		}
 	}
 
-	private List<CarTestVO> getReturnString(PsiType returnType, Project project) {
+	private ReturnClassNameVO getReturnString(PsiType returnType, Project project) {
 		if (returnType == null) {
 			return null;
 		}
@@ -109,33 +113,7 @@ public class GenerateApiDocAction extends AnAction {
 		if ("void".equals(canonicalText)) {
 			return null;
 		}
-		final Pattern pattern = Pattern.compile(reg);
-		final Matcher matcher = pattern.matcher(canonicalText);
-		if (matcher.find()) {
-			String group1 = matcher.group(1);
-			String group2 = matcher.group(2);
-			if (group2.contains("java.util")) {
-				final Pattern patternNew = Pattern.compile(reg);
-				final Matcher matcherNew = pattern.matcher(canonicalText);
-				if (matcherNew.find()) {
-					String group = matcherNew.group(2);
-					if (!group.startsWith("java.util")) {
-						PsiClass onePsiClassByClassName = PsiClassCarTestHelper.findOnePsiClassByClassName(group, project);
-						if (onePsiClassByClassName != null) {
-							return PsiClassCarTestHelper.create(onePsiClassByClassName).convertClassToCarTestList(project, false);
-						}
-					} else {
-
-					}
-				}
-			}
-		} else {
-			PsiClass onePsiClassByClassName = PsiClassCarTestHelper.findOnePsiClassByClassName(canonicalText, project);
-			if (onePsiClassByClassName != null) {
-				return PsiClassCarTestHelper.create(onePsiClassByClassName).convertClassToCarTestList(project, false);
-			}
-		}
-		return null;
+		return JavaTypeUtil.getReturnClassName(canonicalText);
 	}
 
 	@Override

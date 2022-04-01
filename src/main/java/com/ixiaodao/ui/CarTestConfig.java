@@ -3,10 +3,14 @@ package com.ixiaodao.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
 import com.ixiaodao.model.CarTestConfigVO;
 import com.ixiaodao.model.CarTestVO;
 import com.ixiaodao.model.Interface;
+import com.ixiaodao.model.SettingsVO;
+import com.ixiaodao.utils.BizAssert;
 import com.ixiaodao.utils.HttpClient;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -36,6 +40,7 @@ public class CarTestConfig extends DialogWrapper {
     private JTextField projectName;
     private List<CarTestVO> paramList;
     private List<CarTestVO> returnList;
+    private Project project;
 
     @Override
     protected @Nullable JComponent createCenterPanel() {
@@ -59,15 +64,20 @@ public class CarTestConfig extends DialogWrapper {
         returnClassName.setText(config.getReturnClassName());
         commonClassName.setText(config.getCommonClassName());
         projectName.setText(project.getName());
+        this.project = project;
         this.paramList = paramList;
         this.returnList = returnList;
     }
 
-    private void initEvent() {}
-
     @Override
     protected void doOKAction() {
-        onOK();
+        try {
+            onOK();
+        } catch (Exception e) {
+            Messages.showErrorDialog(e.getMessage(), "提示");
+            return;
+        }
+        Messages.showInfoMessage("成功", "提示");
         super.doOKAction();
     }
 
@@ -75,6 +85,7 @@ public class CarTestConfig extends DialogWrapper {
      * 确认按钮回调事件
      */
     private void onOK() {
+        validateParam();
         Interface anInterface = new Interface();
         anInterface.setName(name.getText());
         anInterface.setJira_id(jiraId.getText());
@@ -91,7 +102,38 @@ public class CarTestConfig extends DialogWrapper {
         anInterface.setProjectId(121);
         anInterface.setProjectName(projectName.getText());
 
-        HttpClient.sendPost("http://localhost:8080/interface/audo/autoAdd", anInterface);
+        String addUrl = SettingsVO.getInstance().getAddUrl();
+        if (StringUtils.isEmpty(addUrl)) {
+            throw new RuntimeException("创建文档url为空");
+        }
+        HttpClient.sendPost(addUrl, anInterface);
+    }
+
+    private void validateParam() {
+        BizAssert.notEmpty(projectName.getText(), "项目名称不能为空");
+        BizAssert.notEmpty(name.getText(), "接口名称不能为空");
+
+        if (paramList != null) {
+            for (CarTestVO carTestVO : paramList) {
+                BizAssert.notEmpty(carTestVO.getIdentifier(), "入参变量名不能为空");
+                BizAssert.notEmpty(carTestVO.getName(), "入参" + carTestVO.getIdentifier() + "注释不能为空");
+                BizAssert.notNull(carTestVO.getDataType(), "入参字段类型不能为空");
+                BizAssert.notNull(carTestVO.getParentId(), "入参上级不能为空");
+                BizAssert.notNull(carTestVO.getLevel(), "入参级别不能为空");
+                carTestVO.setType(1);
+            }
+        }
+        if (returnList != null) {
+            for (CarTestVO carTestVO : returnList) {
+                BizAssert.notEmpty(carTestVO.getIdentifier(), "出参变量名不能为空");
+                BizAssert.notEmpty(carTestVO.getName(), "出参" + carTestVO.getIdentifier() + "注释不能为空");
+                BizAssert.notNull(carTestVO.getDataType(), "出参字段类型不能为空");
+                BizAssert.notNull(carTestVO.getParentId(), "出参上级不能为空");
+                BizAssert.notNull(carTestVO.getLevel(), "出参级别不能为空");
+                carTestVO.setType(2);
+            }
+        }
+
 
     }
 

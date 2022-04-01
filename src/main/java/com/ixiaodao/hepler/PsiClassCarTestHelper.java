@@ -18,6 +18,8 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.util.text.DateFormatUtil;
 import com.ixiaodao.model.CarTestVO;
+import com.ixiaodao.utils.JavaTypeUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,6 +32,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 // 处理 实体自关联，第二层自关联字段
@@ -63,19 +66,23 @@ public class PsiClassCarTestHelper {
         List<CarTestVO> jsonMap = new ArrayList<>();
 
         if(psiClass != null){
-
+            if (JavaTypeUtil.isJavaBaseType(psiClass)) {
+                return null;
+            }
             levelMap.put(0, 0);
             assembleClassToMap(jsonMap, idNum, 0, psiClass, project, 1);
         }
-        String queryJson =  gson.toJson(jsonMap) ;
 
-        return queryJson;
+        return gson.toJson(jsonMap);
     }
 
 
     public List<CarTestVO> convertClassToCarTestList(Project project , boolean prettyFormat) {
         List<CarTestVO> jsonMap = new ArrayList<>();
         if(psiClass != null){
+            if (JavaTypeUtil.isJavaBaseType(psiClass)) {
+                return null;
+            }
             levelMap.put(0, 0);
             assembleClassToMap(jsonMap, idNum, 0, psiClass, project, 1);
         }
@@ -149,7 +156,9 @@ public class PsiClassCarTestHelper {
                             continue;
                         }
                         PsiClass onePsiClassByClassName = findOnePsiClassByClassName(parameter.getCanonicalText(), project);
-                        assembleClassToMap(list,idNum + 1, idNum, onePsiClassByClassName, project,1);
+                        if (onePsiClassByClassName != null) {
+                            assembleClassToMap(list,idNum + 1, idNum, onePsiClassByClassName, project,1);
+                        }
                     }
                 }
                 continue;
@@ -157,18 +166,31 @@ public class PsiClassCarTestHelper {
 
             PsiClass resolveClass = ((PsiClassReferenceType) psiFieldType).resolve();
 
-            CarTestVO carTestVO = new CarTestVO();
-            carTestVO.setId(idNum + 1);
-            carTestVO.setParentId(parentId);
-            carTestVO.setLevel(levelMap.get(parentId) + 1);
-            carTestVO.setIdentifier(fieldName);
-            carTestVO.setName(desc);
-            carTestVO.setDataType(typeName);
-            list.add(carTestVO);
-            idNum++;
-            levelMap.put(carTestVO.getId(), carTestVO.getLevel());
+            if (resolveClass != null) {
 
-            assembleClassToMap(list,idNum + 1, idNum, resolveClass, project,1);
+                if (JavaTypeUtil.isJavaBaseType(resolveClass)) {
+                    continue;
+                }
+
+                if (Objects.equals(resolveClass.getQualifiedName(), psiClass.getQualifiedName())) {
+                    if (recursiveCount > 0) {
+                        assembleClassToMap(list, idNum + 1, idNum, resolveClass, project,0);
+                    }
+                } else {
+                    CarTestVO carTestVO = new CarTestVO();
+                    carTestVO.setId(idNum + 1);
+                    carTestVO.setParentId(parentId);
+                    carTestVO.setLevel(levelMap.get(parentId) + 1);
+                    carTestVO.setIdentifier(fieldName);
+                    carTestVO.setName(desc);
+                    carTestVO.setDataType(typeName);
+                    list.add(carTestVO);
+                    idNum++;
+                    levelMap.put(carTestVO.getId(), carTestVO.getLevel());
+
+                    assembleClassToMap(list,idNum + 1, idNum, resolveClass, project,1);
+                }
+            }
 
         }
     }
@@ -198,10 +220,10 @@ public class PsiClassCarTestHelper {
 
     @Nullable
     public static PsiClass findOnePsiClassByClassName(String qualifiedClassName, Project project) {
-//        return findOnePsiClassByClassName_deprecated(className, project);
-//        return findOnePsiClassByClassName2(className, project);
-        PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(qualifiedClassName, GlobalSearchScope.allScope(project));
-        return psiClass;
+        if (StringUtils.isEmpty(qualifiedClassName)) {
+            return null;
+        }
+        return JavaPsiFacade.getInstance(project).findClass(qualifiedClassName, GlobalSearchScope.allScope(project));
     }
 
     @Nullable
