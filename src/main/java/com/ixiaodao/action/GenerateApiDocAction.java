@@ -19,6 +19,7 @@ import com.ixiaodao.model.ReturnClassNameVO;
 import com.ixiaodao.ui.CarTestConfig;
 import com.ixiaodao.utils.DocCommentUtil;
 import com.ixiaodao.utils.JavaTypeUtil;
+import com.ixiaodao.utils.MyStringUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import java.util.List;
@@ -47,9 +48,12 @@ public class GenerateApiDocAction extends AnAction {
 
 			PsiClass containingClass = psiMethod.getContainingClass();
 			String serviceName = null;
+			String beanId = null;
 			if (containingClass != null) {
 				// 服务代码
 				serviceName = containingClass.getQualifiedName() + "#" + psiMethod.getName();
+				String name = containingClass.getName();
+				beanId = MyStringUtil.toLowerCaseFirstOne(name);
 			}
 			PsiParameterList parameterList = psiMethod.getParameterList();
 			PsiParameter[] parameters = parameterList.getParameters();
@@ -64,7 +68,6 @@ public class GenerateApiDocAction extends AnAction {
 				paramClassName = parameters[0].getType().getCanonicalText();
 			}
 			String returnClassName = null;
-			String commonClassName = null;
 			PsiType returnType = psiMethod.getReturnType();
 			if (returnType != null) {
 				returnClassName = returnType.getCanonicalText();
@@ -74,7 +77,7 @@ public class GenerateApiDocAction extends AnAction {
 			carTestConfigVO.setName(desc);
 			carTestConfigVO.setDesc(desc);
 			carTestConfigVO.setServiceName(serviceName);
-			carTestConfigVO.setBeanId(serviceName);
+			carTestConfigVO.setBeanId(beanId);
 			carTestConfigVO.setMethodName(psiMethod.getName());
 			carTestConfigVO.setParamClassName(paramClassName);
 			carTestConfigVO.setReturnClassName(returnClassName);
