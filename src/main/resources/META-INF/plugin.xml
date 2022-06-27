@@ -55,7 +55,7 @@
       </group>
 
 
-      <action id="ConvertClassToCarTestJSONCompressedActionZc" class="com.ixiaodao.action.ConvertClassToCarTestJSONCompressedAction" text="Convert to CarTest JSON " description="Convert to CarTest JSON">
+      <action id="ConvertClassToCarTestJSONCompressedActionZc" class="com.ixiaodao.action.ConvertClassToCarTestJSONCompressedAction" text="Convert to CarTest New" description="Convert to CarTest JSON">
           <add-to-group group-id="EditorPopupMenu" anchor="first" />
       </action>
 

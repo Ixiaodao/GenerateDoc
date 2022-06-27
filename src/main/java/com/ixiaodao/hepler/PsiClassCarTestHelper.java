@@ -10,10 +10,11 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiType;
+import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.impl.java.stubs.index.JavaShortClassNameIndex;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
+import com.intellij.psi.impl.source.PsiFieldImpl;
 import com.intellij.psi.javadoc.PsiDocComment;
-import com.intellij.psi.javadoc.PsiDocToken;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.util.text.DateFormatUtil;
@@ -104,14 +105,28 @@ public class PsiClassCarTestHelper {
             if (docComment != null) {
                 PsiElement[] descriptionElements = docComment.getDescriptionElements();
                 for (PsiElement descriptionElement : descriptionElements) {
-                    if (descriptionElement instanceof PsiDocToken) {
-                        desc = desc + descriptionElement.getText() + "    ";
+                    if (!(descriptionElement instanceof PsiWhiteSpace)) {
+                        desc = desc + descriptionElement.getText().trim() + " ";
+                    }
+                }
+            } else {
+                PsiElement navigationElement = field.getNavigationElement();
+                if (navigationElement instanceof PsiFieldImpl) {
+                    PsiFieldImpl psiFieldImpl = (PsiFieldImpl) navigationElement;
+                    PsiDocComment docComment1 = psiFieldImpl.getDocComment();
+                    if (docComment1 != null) {
+                        PsiElement[] descriptionElements = docComment1.getDescriptionElements();
+                        for (PsiElement descriptionElement : descriptionElements) {
+                            if (!(descriptionElement instanceof PsiWhiteSpace)) {
+                                desc = desc + descriptionElement.getText().trim() + " ";
+                            }
+                        }
                     }
                 }
             }
 
 //            common base type
-            if (isJavaBaseType(typeName)) {
+            if (isJavaBaseType(typeName) || typeName.contains("[]")) {
                 CarTestVO carTestVO = new CarTestVO();
                 carTestVO.setId(idNum + 1);
                 carTestVO.setParentId(parentId);
@@ -164,31 +179,33 @@ public class PsiClassCarTestHelper {
                 continue;
             }
 
-            PsiClass resolveClass = ((PsiClassReferenceType) psiFieldType).resolve();
+            if ((psiFieldType instanceof PsiClassReferenceType)) {
+                PsiClass resolveClass = ((PsiClassReferenceType) psiFieldType).resolve();
 
-            if (resolveClass != null) {
+                if (resolveClass != null) {
 
-                if (JavaTypeUtil.isJavaBaseType(resolveClass)) {
-                    continue;
-                }
-
-                if (Objects.equals(resolveClass.getQualifiedName(), psiClass.getQualifiedName())) {
-                    if (recursiveCount > 0) {
-                        assembleClassToMap(list, idNum + 1, idNum, resolveClass, project,0);
+                    if (JavaTypeUtil.isJavaBaseType(resolveClass)) {
+                        continue;
                     }
-                } else {
-                    CarTestVO carTestVO = new CarTestVO();
-                    carTestVO.setId(idNum + 1);
-                    carTestVO.setParentId(parentId);
-                    carTestVO.setLevel(levelMap.get(parentId) + 1);
-                    carTestVO.setIdentifier(fieldName);
-                    carTestVO.setName(desc);
-                    carTestVO.setDataType(typeName);
-                    list.add(carTestVO);
-                    idNum++;
-                    levelMap.put(carTestVO.getId(), carTestVO.getLevel());
 
-                    assembleClassToMap(list,idNum + 1, idNum, resolveClass, project,1);
+                    if (Objects.equals(resolveClass.getQualifiedName(), psiClass.getQualifiedName())) {
+                        if (recursiveCount > 0) {
+                            assembleClassToMap(list, idNum + 1, idNum, resolveClass, project,0);
+                        }
+                    } else {
+                        CarTestVO carTestVO = new CarTestVO();
+                        carTestVO.setId(idNum + 1);
+                        carTestVO.setParentId(parentId);
+                        carTestVO.setLevel(levelMap.get(parentId) + 1);
+                        carTestVO.setIdentifier(fieldName);
+                        carTestVO.setName(desc);
+                        carTestVO.setDataType("Object");
+                        list.add(carTestVO);
+                        idNum++;
+                        levelMap.put(carTestVO.getId(), carTestVO.getLevel());
+
+                        assembleClassToMap(list,idNum + 1, idNum, resolveClass, project,1);
+                    }
                 }
             }
 

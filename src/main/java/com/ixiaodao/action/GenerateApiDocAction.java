@@ -51,7 +51,7 @@ public class GenerateApiDocAction extends AnAction {
 			String beanId = null;
 			if (containingClass != null) {
 				// 服务代码
-				serviceName = containingClass.getQualifiedName() + "#" + psiMethod.getName();
+				serviceName = containingClass.getQualifiedName();
 				String name = containingClass.getName();
 				beanId = MyStringUtil.toLowerCaseFirstOne(name);
 			}

@@ -38,9 +38,12 @@ public class CarTestConfig extends DialogWrapper {
     private JTextField returnClassName;
     private JTextField commonClassName;
     private JTextField projectName;
+    private JRadioButton dubboRadioButton;
+    private JRadioButton prismRadioButton;
     private List<CarTestVO> paramList;
     private List<CarTestVO> returnList;
     private Project project;
+    private String tempServiceName;
 
     @Override
     protected @Nullable JComponent createCenterPanel() {
@@ -64,9 +67,38 @@ public class CarTestConfig extends DialogWrapper {
         returnClassName.setText(config.getReturnClassName());
         commonClassName.setText(config.getCommonClassName());
         projectName.setText(project.getName());
+
         this.project = project;
         this.paramList = paramList;
         this.returnList = returnList;
+
+        tempServiceName = serviceName.getText() + "#" + methodName.getText();
+
+        serviceName.setText(tempServiceName);
+
+        dubboRadioButton.setSelected(true);
+
+        dubboRadioButton.addActionListener(e -> {
+            JRadioButton button = (JRadioButton)e.getSource();
+            if (button.isSelected()) {
+                serviceName.setText(tempServiceName);
+                prismRadioButton.setSelected(false);
+            } else {
+                serviceName.setText(project.getName() + "." + beanId.getText() + "." + methodName.getText());
+                prismRadioButton.setSelected(true);
+            }
+        });
+        prismRadioButton.addActionListener(e -> {
+            JRadioButton button = (JRadioButton)e.getSource();
+            if (button.isSelected()) {
+                serviceName.setText(project.getName() + "." + beanId.getText() + "." + methodName.getText());
+                dubboRadioButton.setSelected(false);
+            } else {
+                serviceName.setText(tempServiceName);
+                dubboRadioButton.setSelected(true);
+            }
+        });
+
     }
 
     @Override
