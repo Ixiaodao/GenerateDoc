@@ -471,7 +471,7 @@ public class PsiClassCarTestHelper {
         }
 
         PsiClass resolvePsiClass = ((PsiClassReferenceType) psiFieldType).resolve();
-        if (resolvePsiClass.getQualifiedName().equals("java.util.List")) {
+        if (resolvePsiClass != null && resolvePsiClass.getQualifiedName() != null && resolvePsiClass.getQualifiedName().equals("java.util.List")) {
             return true ;
         }
 

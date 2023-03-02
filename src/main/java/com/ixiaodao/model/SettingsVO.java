@@ -27,7 +27,7 @@ public class SettingsVO implements PersistentStateComponent<SettingsVO>, Seriali
 		return ServiceManager.getService(project, SettingsVO.class);
 	}
 
-	private String addUrl = "http://localhost:8080/interface/auto/autoAdd";
+	private String addUrl = "http://cartest.zuche.com/interface/auto/autoAdd";
 
 	@Nullable
 	@Override
